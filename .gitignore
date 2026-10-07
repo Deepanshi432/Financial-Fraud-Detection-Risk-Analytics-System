@@ -1,0 +1,12 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+
+# Machine Learning Artifacts & Database
+*.pkl
+*.db
+transactions.csv
+
+# Virtual Environment
+venv/
+.env
