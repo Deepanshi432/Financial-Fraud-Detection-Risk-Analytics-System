@@ -14,6 +14,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Auto-generate dataset & model if missing on Cloud deployment
+base_dir = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(base_dir, "transactions.csv")
+model_path = os.path.join(base_dir, "fraud_model.pkl")
+cols_path = os.path.join(base_dir, "model_columns.pkl")
+
+if not os.path.exists(data_path) or not os.path.exists(model_path) or not os.path.exists(cols_path):
+    st.warning("⚙️ Initializing Cloud Environment: Generating synthetic dataset and training machine learning model...")
+    import Database_setup
+    Database_setup.create_database()
+    import Train_classifier
+    Train_classifier.train_model()
+    st.success("✅ Initialization complete! Loading dashboard...")
+    st.rerun()
+
 # Custom High-End Dark Enterprise Styling
 st.markdown("""
     <style>
@@ -91,10 +106,6 @@ st.markdown("""
 
 @st.cache_resource
 def load_model_assets():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(base_dir, "fraud_model.pkl")
-    cols_path = os.path.join(base_dir, "model_columns.pkl")
-    
     if os.path.exists(model_path) and os.path.exists(cols_path):
         with open(model_path, "rb") as f:
             model = pickle.load(f)
@@ -105,8 +116,6 @@ def load_model_assets():
 
 @st.cache_data
 def load_data():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(base_dir, "transactions.csv")
     if os.path.exists(data_path):
         df = pd.read_csv(data_path)
         df['timestamp'] = pd.to_datetime(df['timestamp'])
